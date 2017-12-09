@@ -7,6 +7,8 @@ plugins {
 dependencies {
     expectedBy(project(":common"))
     implementation(kotlin("stdlib-jdk8"))
+    testCompile(kotlin("test"))
+    testCompile(kotlin("test-junit"))
 }
 
 tasks.withType<KotlinCompile> {
