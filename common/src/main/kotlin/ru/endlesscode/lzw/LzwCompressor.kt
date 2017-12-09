@@ -28,6 +28,8 @@ package ru.endlesscode.lzw
 import ru.endlesscode.lzw.io.InputStream
 import ru.endlesscode.lzw.io.OutputStream
 import ru.endlesscode.lzw.io.readEachByte
+import ru.endlesscode.lzw.util.ByteWord
+import ru.endlesscode.lzw.util.wordFromBytes
 
 class LzwCompressor : Compressor {
 
@@ -43,30 +45,34 @@ class LzwCompressor : Compressor {
     /**
      * Table that maps bytes sequence to its position in decode table.
      */
-    private lateinit var codeTable: MutableMap<ByteArray, Int>
+    private lateinit var codeTable: MutableMap<ByteWord, Int>
 
     /**
      * List that contains bytes sequences
      */
-    private lateinit var decodeTable: MutableList<ByteArray>
+    private lateinit var decodeTable: MutableList<ByteWord>
 
 
     override fun compress(input: InputStream, output: OutputStream) {
         initTables()
 
-        var code = INIT_DICT_SIZE
-        var word = byteArrayOf()
+        var nextCode = INIT_DICT_SIZE
+        var word = ByteWord()
         var lastKey: Int = -1
 
         input.readEachByte { byte ->
-            val key = codeTable[word]
-            if (key != null) {
-                lastKey = key
+            val code = codeTable[word]
+            println(code)
+            if (code != null) {
+                lastKey = code
                 word += byte
-            } else if (lastKey != -1) {
-                output.write(lastKey)
-                codeTable.put(word, code++)
-                word = byteArrayOf(byte)
+            } else {
+                if (lastKey != -1) {
+                    output.write(lastKey)
+                    codeTable.put(word, nextCode++)
+                }
+
+                word = wordFromBytes(byte)
             }
         }
 
@@ -83,8 +89,8 @@ class LzwCompressor : Compressor {
         decodeTable = arrayListOf()
 
         for (i in 0 until INIT_DICT_SIZE) {
-            codeTable.put(byteArrayOf(i.toByte()), i)
-            decodeTable.add(byteArrayOf(i.toByte()))
+            codeTable.put(wordFromBytes(i.toByte()), i)
+            decodeTable.add(wordFromBytes(i.toByte()))
         }
     }
 }
