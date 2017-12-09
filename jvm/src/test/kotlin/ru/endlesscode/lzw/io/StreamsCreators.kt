@@ -23,32 +23,10 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.lzw
+package ru.endlesscode.lzw.io
 
-import org.junit.Before
-import org.junit.Test
-import ru.endlesscode.lzw.io.InputStream
-import ru.endlesscode.lzw.io.outputStreamToList
-import java.io.ByteArrayInputStream
-import kotlin.test.assertEquals
-
-class LzwCompressorTest {
-
-    private lateinit var compressor: Compressor
-
-    @Before
-    fun setUp() {
-        this.compressor = LzwCompressor()
+fun outputStreamToList(list: MutableList<Int>) = OutputStream(object : java.io.OutputStream() {
+    override fun write(b: Int) {
+        list += b
     }
-
-    @Test
-    fun compressShouldWorksRight() {
-        val inputStream = InputStream(ByteArrayInputStream("abacabadabacabae".toByteArray()))
-        val output = mutableListOf<Int>()
-        val outputStream = outputStreamToList(output)
-
-        compressor.compress(inputStream, outputStream)
-
-        assertEquals(arrayListOf(97, 98, 97, 99, 256, 97, 100, 260, 259, 257, 101), output)
-    }
-}
+})
