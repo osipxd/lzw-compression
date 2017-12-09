@@ -6,9 +6,9 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/common_main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/common_main.iml" group="common" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/common_test.iml" filepath="$PROJECT_DIR$/.idea/modules/common/common_test.iml" group="common" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/jvm/jvm.iml" filepath="$PROJECT_DIR$/.idea/modules/jvm/jvm.iml" group="jvm" />
-      <module fileurl="file://$PROJECT_DIR$/lzw-compression.iml" filepath="$PROJECT_DIR$/lzw-compression.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/lzw-compression-common_main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/lzw-compression-common_main.iml" group="common" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/lzw-compression-common_test.iml" filepath="$PROJECT_DIR$/.idea/modules/common/lzw-compression-common_test.iml" group="common" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/jvm/jvm_main.iml" filepath="$PROJECT_DIR$/.idea/modules/jvm/jvm_main.iml" group="jvm" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/jvm/jvm_test.iml" filepath="$PROJECT_DIR$/.idea/modules/jvm/jvm_test.iml" group="jvm" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/lzw-compression.iml" filepath="$PROJECT_DIR$/.idea/modules/lzw-compression.iml" />
     </modules>
   </component>
 </project>
