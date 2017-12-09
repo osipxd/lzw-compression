@@ -25,5 +25,16 @@
 
 package ru.endlesscode.lzw.io
 
-actual typealias InputStream = java.io.InputStream
-actual typealias OutputStream = java.io.OutputStream
+actual class InputStream(private val stream: java.io.InputStream) {
+    actual fun read(): Int = stream.read()
+}
+
+actual class OutputStream(private val stream: java.io.OutputStream) {
+    actual fun write(b: Int) {
+        stream.write(b)
+    }
+
+    actual fun flush() {
+        stream.flush()
+    }
+}

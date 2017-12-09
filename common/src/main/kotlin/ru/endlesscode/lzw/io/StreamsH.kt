@@ -25,13 +25,13 @@
 
 package ru.endlesscode.lzw.io
 
-expect abstract class InputStream {
-    abstract fun read(): Int
+expect class InputStream {
+    fun read(): Int
 }
 
-expect abstract class OutputStream {
-    abstract fun write(b: Int)
-    open fun flush()
+expect class OutputStream {
+    fun write(b: Int)
+    fun flush()
 }
 
 

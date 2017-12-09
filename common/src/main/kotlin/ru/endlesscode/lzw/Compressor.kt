@@ -29,6 +29,6 @@ import ru.endlesscode.lzw.io.InputStream
 import ru.endlesscode.lzw.io.OutputStream
 
 interface Compressor {
-    fun decompress(input: InputStream, output: OutputStream)
     fun compress(input: InputStream, output: OutputStream)
+    fun decompress(input: InputStream, output: OutputStream)
 }
