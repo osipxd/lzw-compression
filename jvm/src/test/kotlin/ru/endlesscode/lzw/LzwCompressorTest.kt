@@ -27,12 +27,29 @@ package ru.endlesscode.lzw
 
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import ru.endlesscode.lzw.io.InputStream
 import ru.endlesscode.lzw.io.outputStreamToList
 import java.io.ByteArrayInputStream
 import kotlin.test.assertEquals
 
-class LzwCompressorTest {
+
+@RunWith(Parameterized::class)
+class LzwCompressorTest(
+        private val decoded: String,
+        private val encoded: List<Int>
+) {
+
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters
+        fun data(): Collection<Array<out Any>> {
+            return listOf(
+                    arrayOf("abacabadabacabae", arrayListOf(97, 98, 97, 99, 256, 97, 100, 260, 259, 257, 101))
+            )
+        }
+    }
 
     private lateinit var compressor: Compressor
 
@@ -43,12 +60,12 @@ class LzwCompressorTest {
 
     @Test
     fun compressShouldWorksRight() {
-        val inputStream = InputStream(ByteArrayInputStream("abacabadabacabae".toByteArray()))
+        val inputStream = InputStream(ByteArrayInputStream(decoded.toByteArray()))
         val output = mutableListOf<Int>()
         val outputStream = outputStreamToList(output)
 
         compressor.compress(inputStream, outputStream)
 
-        assertEquals(arrayListOf(97, 98, 97, 99, 256, 97, 100, 260, 259, 257, 101), output)
+        assertEquals(encoded, output)
     }
 }
