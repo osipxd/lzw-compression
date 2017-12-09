@@ -1,0 +1,4 @@
+rootProject.name = 'lzw-compression'
+
+include 'common',
+        'jvm'
