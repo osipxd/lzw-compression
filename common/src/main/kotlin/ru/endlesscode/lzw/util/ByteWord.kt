@@ -41,6 +41,10 @@ class ByteWord(private val inner: ByteArray = byteArrayOf()) {
     }
 
     override fun hashCode(): Int = inner.contentHashCode()
+
+    override fun toString(): String {
+        return inner.contentToString()
+    }
 }
 
 fun wordFromBytes(vararg bytes: Byte) = ByteWord(bytes)

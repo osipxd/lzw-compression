@@ -57,22 +57,16 @@ class LzwCompressor : Compressor {
         initTables()
 
         var nextCode = INIT_DICT_SIZE
-        var word = ByteWord()
-        var lastKey: Int = -1
+        var word = wordFromBytes(input.read().toByte())
 
         input.readEachByte { byte ->
-            val code = codeTable[word]
-            println(code)
-            if (code != null) {
-                lastKey = code
-                word += byte
+            val newWord = word + byte
+            word = if (codeTable.contains(newWord)) {
+                newWord
             } else {
-                if (lastKey != -1) {
-                    output.write(lastKey)
-                    codeTable.put(word, nextCode++)
-                }
-
-                word = wordFromBytes(byte)
+                output.write(codeTable[word] ?: throw Error("Word '$word' must be in table."))
+                codeTable.put(newWord, nextCode++)
+                wordFromBytes(byte)
             }
         }
 

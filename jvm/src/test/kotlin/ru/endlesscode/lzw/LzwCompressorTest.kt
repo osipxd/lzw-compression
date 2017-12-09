@@ -49,12 +49,10 @@ class LzwCompressorTest {
             override fun write(b: Int) {
                 output += b
             }
-
-
         })
 
         compressor.compress(inputStream, outputStream)
 
-        assertEquals(arrayListOf(0, 1, 0, 2, 5, 0, 3, 9, 8, 6, 4), output)
+        assertEquals(arrayListOf(97, 98, 97, 99, 256, 97, 100, 260, 259, 257, 101), output)
     }
 }
