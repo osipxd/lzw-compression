@@ -25,26 +25,5 @@
 
 package ru.endlesscode.lzw.io
 
-expect abstract class InputStream {
-    abstract fun read(): Int
-}
-
-expect abstract class OutputStream {
-    abstract fun write(b: Int)
-    open fun flush()
-}
-
-
-// Extensions
-
-inline fun InputStream.readEachByte(process: (Byte) -> Unit) {
-    readEach { process(it.toByte()) }
-}
-
-inline fun InputStream.readEach(process: (Int) -> Unit) {
-    var value = this.read()
-    while (value != -1) {
-        process(value)
-        value = this.read()
-    }
-}
+actual typealias InputStream = java.io.InputStream
+actual typealias OutputStream = java.io.OutputStream
