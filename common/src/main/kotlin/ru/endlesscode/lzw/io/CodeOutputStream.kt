@@ -28,10 +28,10 @@ package ru.endlesscode.lzw.io
 import ru.endlesscode.lzw.util.Bytes
 
 /**
- * Stream that can write out parts more than one byte.
+ * Stream that can write out codes that can't fit to one byte.
  *
  * @param stream Target stream
- * @param codeLength Determines part size
+ * @param codeLength Determines code size. Can't be higher than [bufferSize]
  */
 class CodeOutputStream(
         private val stream: OutputStream,
@@ -44,7 +44,7 @@ class CodeOutputStream(
     private val mask = Bytes.mask(codeLength)
 
     /**
-     * Size of [buffer].
+     * Size of [buffer] in bits.
      */
     private val bufferSize = Bytes.BITS_IN_INT
 
@@ -56,12 +56,12 @@ class CodeOutputStream(
     private var buffer = 0
 
     /**
-     * Used bits of [buffer]
+     * Used bits of [buffer].
      */
     private var usedBits = 0
 
     /**
-     * Validates input params
+     * Validates input params.
      */
     init {
         if (codeLength > bufferSize) {
@@ -78,7 +78,7 @@ class CodeOutputStream(
     }
 
     /**
-     * Write full bytes from [buffer] to [stream].
+     * Write filled bytes from [buffer] to [stream].
      */
     private fun writeBuffer() {
         while (usedBits >= Bytes.BITS_IN_BYTE) {
