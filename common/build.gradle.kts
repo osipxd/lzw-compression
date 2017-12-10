@@ -4,4 +4,6 @@ plugins {
 
 dependencies {
     implementation(kotlin("stdlib-common"))
+    testCompile(kotlin("test-common"))
+    testCompile(kotlin("test-annotations-common"))
 }

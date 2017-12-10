@@ -23,51 +23,30 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.lzw
+package ru.endlesscode.lzw.util
 
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import ru.endlesscode.lzw.io.InputStream
-import ru.endlesscode.lzw.io.OutputStream
-import ru.endlesscode.lzw.util.toHexString
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import kotlin.test.assertEquals
+object Bytes {
+    const val BYTE_MASK = 0xFF
+    const val BYTES_IN_INT = 4
+    const val BITS_IN_BYTE = 8
+    const val BITS_IN_INT = BITS_IN_BYTE * BYTES_IN_INT
 
+    const val HEX_CHARS = "0123456789ABCDEF"
 
-@RunWith(Parameterized::class)
-class LzwCompressorTest(
-        private val decoded: String,
-        private val encoded: String
-) {
+    fun hex(vararg bytes: Byte): String = bytes.toHexString()
+}
 
-    companion object {
-        @JvmStatic
-        @Parameterized.Parameters
-        fun data(): Collection<Array<out Any>> {
-            return listOf(
-                    arrayOf("abacabadabacabae", "61 20 06 61 30 06 00 11 06 64 40 10 03 11 10 65")
-            )
-        }
+fun Byte.unsigned(): Int = this.toInt() and 0xFF
+
+fun ByteArray.toHexString(): String {
+    val hexChars = CharArray(size * 3)
+    for (i in indices) {
+        val v = this[i].unsigned()
+        val j = i * 3
+        hexChars[j] = Bytes.HEX_CHARS[v ushr 0x04]
+        hexChars[j + 1] = Bytes.HEX_CHARS[v and 0x0F]
+        hexChars[j + 2] = ' '
     }
 
-    private lateinit var compressor: Compressor
-
-    @Before
-    fun setUp() {
-        this.compressor = LzwCompressor()
-    }
-
-    @Test
-    fun compressShouldWorksRight() {
-        val inputStream = InputStream(ByteArrayInputStream(decoded.toByteArray()))
-        val baos = ByteArrayOutputStream()
-        val outputStream = OutputStream(baos)
-
-        compressor.compress(inputStream, outputStream)
-
-        assertEquals(encoded, baos.toByteArray().toHexString())
-    }
+    return hexChars.joinToString(separator = "").trimEnd()
 }

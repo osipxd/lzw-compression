@@ -23,51 +23,53 @@
  * SOFTWARE.
  */
 
-package ru.endlesscode.lzw
+package ru.endlesscode.lzw.io
 
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import ru.endlesscode.lzw.io.InputStream
-import ru.endlesscode.lzw.io.OutputStream
-import ru.endlesscode.lzw.util.toHexString
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import kotlin.test.assertEquals
+import ru.endlesscode.lzw.util.Bytes
 
 
-@RunWith(Parameterized::class)
-class LzwCompressorTest(
-        private val decoded: String,
-        private val encoded: String
+class CodeOutputStream(
+        private val stream: OutputStream,
+        private val codeLength: Int
 ) {
 
-    companion object {
-        @JvmStatic
-        @Parameterized.Parameters
-        fun data(): Collection<Array<out Any>> {
-            return listOf(
-                    arrayOf("abacabadabacabae", "61 20 06 61 30 06 00 11 06 64 40 10 03 11 10 65")
-            )
+    private val mask = (1 shl codeLength) - 1
+    private val bufSize = Bytes.BITS_IN_INT
+
+    private var buf = 0
+    private var bufUsedBits = 0
+
+    init {
+        if (codeLength > bufSize) {
+            throw IllegalArgumentException("Code length $codeLength is more than buffer size.")
         }
     }
 
-    private lateinit var compressor: Compressor
+    fun write(code: Int) {
+        val bufferedCode = (code and mask) shl (bufUsedBits)
+        buf = buf or bufferedCode
+        bufUsedBits += codeLength
 
-    @Before
-    fun setUp() {
-        this.compressor = LzwCompressor()
+        writeBuffer()
     }
 
-    @Test
-    fun compressShouldWorksRight() {
-        val inputStream = InputStream(ByteArrayInputStream(decoded.toByteArray()))
-        val baos = ByteArrayOutputStream()
-        val outputStream = OutputStream(baos)
+    private fun writeBuffer() {
+        while (bufUsedBits >= Bytes.BITS_IN_BYTE) {
+            writeNextByte()
+            buf = buf ushr Bytes.BITS_IN_BYTE
+            bufUsedBits -= Bytes.BITS_IN_BYTE
+        }
+    }
 
-        compressor.compress(inputStream, outputStream)
+    fun flush() {
+        if (buf != 0) {
+            writeNextByte()
+        }
 
-        assertEquals(encoded, baos.toByteArray().toHexString())
+        stream.flush()
+    }
+
+    private fun writeNextByte() {
+        stream.write(buf and Bytes.BYTE_MASK)
     }
 }

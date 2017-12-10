@@ -25,13 +25,24 @@
 
 package ru.endlesscode.lzw
 
+import ru.endlesscode.lzw.LzwCompressor.Companion.INIT_DICT_SIZE
+import ru.endlesscode.lzw.io.CodeOutputStream
 import ru.endlesscode.lzw.io.InputStream
 import ru.endlesscode.lzw.io.OutputStream
 import ru.endlesscode.lzw.io.readEachByte
 import ru.endlesscode.lzw.util.ByteWord
 import ru.endlesscode.lzw.util.wordFromBytes
 
-class LzwCompressor : Compressor {
+/**
+ * Compressor that uses LZW algorithm to compress and decompress streams.
+ *
+ * @param codeLength Code length in bits. It determines how much records can be in [codeTable].
+ * Available number of records can be calculated as 2^[codeLength] - [INIT_DICT_SIZE]. With current
+ * implementation of [CodeOutputStream] and [CodeInputStream] it can't be higher than 64.
+ */
+class LzwCompressor(
+        val codeLength: Int = DEFAULT_CODE_LENGTH
+) : Compressor {
 
     companion object {
 
@@ -40,6 +51,12 @@ class LzwCompressor : Compressor {
          * On starting compression each byte mapping to itself.
          */
         private const val INIT_DICT_SIZE = 256
+
+        /**
+         * By default we can store in [codeTable] 2^12 records. But 256 of records occupied
+         * by [INIT_DICT_SIZE]. As result we have 3840 places for records in [codeTable].
+         */
+        private const val DEFAULT_CODE_LENGTH = 12
     }
 
     /**
@@ -58,20 +75,21 @@ class LzwCompressor : Compressor {
 
         var nextCode = INIT_DICT_SIZE
         var word = wordFromBytes(input.read().toByte())
+        val codeOutput = CodeOutputStream(output, codeLength)
 
         input.readEachByte { byte ->
             val newWord = word + byte
             word = if (codeTable.contains(newWord)) {
                 newWord
             } else {
-                output.write(codeTable[word] ?: throw Error("Word '$word' must be in table."))
+                codeOutput.write(codeTable[word] ?: throw Error("Word '$word' must be in table."))
                 codeTable.put(newWord, nextCode++)
                 wordFromBytes(byte)
             }
         }
 
         codeTable[word]?.let(output::write)
-        output.flush()
+        codeOutput.flush()
     }
 
     override fun decompress(input: InputStream, output: OutputStream) {
