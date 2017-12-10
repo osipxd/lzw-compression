@@ -44,10 +44,9 @@ class CodeInputStream(
     }
 
     fun read(): Int {
-        fillBuffer()
-
         if (buffer == EOF) return EOF
 
+        fillBuffer()
         return readCodeFromBuffer()
     }
 
@@ -55,7 +54,7 @@ class CodeInputStream(
         while (bufferedBits < codeLength) {
             val byte = stream.read()
             if (byte == EOF) {
-                buffer = EOF
+                bufferedBits = EOF
                 return
             }
 
@@ -65,10 +64,24 @@ class CodeInputStream(
     }
 
     private fun readCodeFromBuffer(): Int {
+        if (bufferedBits == EOF) {
+            val lastBuffer = buffer
+            this.buffer = EOF
+            return lastBuffer
+        }
+
         val code = buffer and mask
         buffer = buffer ushr codeLength
         bufferedBits -= codeLength
 
         return code
+    }
+}
+
+fun CodeInputStream.consumeEach(consume: (Int) -> Unit) {
+    var value = this.read()
+    while (value != -1) {
+        consume(value)
+        value = this.read()
     }
 }

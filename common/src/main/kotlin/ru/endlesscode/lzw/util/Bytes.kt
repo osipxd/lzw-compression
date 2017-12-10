@@ -33,9 +33,9 @@ object Bytes {
 
     const val HEX_CHARS = "0123456789ABCDEF"
 
-    fun mask(bits: Int): Int = powerOfTwo(bits) - 1
+    fun longMask(bits: Int): Long = mask(bits).unsignedToLong()
 
-    fun powerOfTwo(power: Int): Int = 1 shl power
+    fun mask(bits: Int): Int = (1 shl bits) - 1
 }
 
 fun Byte.unsignedToInt(): Int = this.toInt() and 0xFF

@@ -26,10 +26,7 @@
 package ru.endlesscode.lzw
 
 import ru.endlesscode.lzw.LzwCompressor.Companion.INIT_DICT_SIZE
-import ru.endlesscode.lzw.io.CodeOutputStream
-import ru.endlesscode.lzw.io.InputStream
-import ru.endlesscode.lzw.io.OutputStream
-import ru.endlesscode.lzw.io.consumeEachByte
+import ru.endlesscode.lzw.io.*
 import ru.endlesscode.lzw.util.ByteWord
 import ru.endlesscode.lzw.util.Bytes
 import ru.endlesscode.lzw.util.unsignedToLong
@@ -44,7 +41,7 @@ import ru.endlesscode.lzw.util.wordFromBytes
  * Changing of this parameter can increase or decrease compression rate.
  */
 class LzwCompressor(
-        val codeLength: Int = DEFAULT_CODE_LENGTH
+        private val codeLength: Int = DEFAULT_CODE_LENGTH
 ) : Compressor {
 
     companion object {
@@ -80,16 +77,17 @@ class LzwCompressor(
     /**
      * Maximal possible code of entry in [codeTable]. It equals to maximal.
      */
-    private val maxCode: Long = Bytes.powerOfTwo(codeLength).unsignedToLong()
+    private val maxCode: Long = Bytes.longMask(codeLength)
 
     override fun compress(input: InputStream, output: OutputStream) {
-        initTables()
+        init()
 
         var word = wordFromBytes(input.read().toByte())
         val codeOutput = CodeOutputStream(output, codeLength)
+        var newWord: ByteWord
 
         input.consumeEachByte { byte ->
-            val newWord = word + byte
+            newWord = word + byte
             word = if (codeTable.contains(newWord)) {
                 newWord
             } else {
@@ -124,13 +122,34 @@ class LzwCompressor(
     }
 
     override fun decompress(input: InputStream, output: OutputStream) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        init()
+
+        val codeInput = CodeInputStream(input, codeLength)
+        var code = codeInput.read()
+        var leadingByte = code.toByte()
+
+        output.write(code)
+
+        codeInput.consumeEach { newCode ->
+            val word = if (newCode > decodeTable.lastIndex) {
+                decodeTable[code] + leadingByte
+            } else {
+                decodeTable[newCode]
+            }
+
+            output.write(word)
+            leadingByte = word[0]
+            decodeTable.add(decodeTable[code] + leadingByte)
+            code = newCode
+        }
+
+        output.flush()
     }
 
     /**
-     * Initialize [codeTable] and [decodeTable] before compression/decompression.
+     * Initialize [codeTable] and [decodeTable] before compression/decompression and reset [nextCode].
      */
-    private fun initTables() {
+    private fun init() {
         nextCode = INIT_DICT_SIZE.unsignedToLong()
         codeTable = hashMapOf()
         decodeTable = arrayListOf()

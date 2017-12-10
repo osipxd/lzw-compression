@@ -25,6 +25,8 @@
 
 package ru.endlesscode.lzw.io
 
+import ru.endlesscode.lzw.util.ByteWord
+
 expect class InputStream {
     fun read(): Int
 }
@@ -37,14 +39,18 @@ expect class OutputStream {
 
 // Extensions
 
-inline fun InputStream.consumeEachByte(process: (Byte) -> Unit) {
-    readEach { process(it.toByte()) }
+inline fun InputStream.consumeEachByte(consume: (Byte) -> Unit) {
+    consumeEach { consume(it.toByte()) }
 }
 
-inline fun InputStream.readEach(process: (Int) -> Unit) {
+inline fun InputStream.consumeEach(consume: (Int) -> Unit) {
     var value = this.read()
     while (value != -1) {
-        process(value)
+        consume(value)
         value = this.read()
     }
+}
+
+fun OutputStream.write(word: ByteWord) {
+    word.forEach { this.write(it.toInt()) }
 }

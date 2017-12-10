@@ -39,8 +39,8 @@ import kotlin.test.assertEquals
 
 @RunWith(Parameterized::class)
 class LzwCompressorTest(
-        private val decoded: String,
-        private val encoded: String
+        private val source: String,
+        private val compressed: String
 ) {
 
     companion object {
@@ -62,12 +62,26 @@ class LzwCompressorTest(
 
     @Test
     fun compressShouldWorksRight() {
-        val inputStream = InputStream(ByteArrayInputStream(decoded.toByteArray()))
+        val inputStream = InputStream(ByteArrayInputStream(source.toByteArray()))
         val baos = ByteArrayOutputStream()
         val outputStream = OutputStream(baos)
 
         compressor.compress(inputStream, outputStream)
 
-        assertEquals(encoded, baos.toByteArray().toHexString())
+        assertEquals(compressed, baos.toByteArray().toHexString())
+    }
+
+    @Test
+    fun decompressShouldWorksRight() {
+        val compressedBytes = compressed.split(" ")
+                .map { it.toInt(16).toByte() }
+
+        val inputStream = InputStream(ByteArrayInputStream(compressedBytes.toByteArray()))
+        val baos = ByteArrayOutputStream()
+        val outputStream = OutputStream(baos)
+
+        compressor.decompress(inputStream, outputStream)
+
+        assertEquals(source, baos.toString())
     }
 }

@@ -29,9 +29,13 @@ package ru.endlesscode.lzw.util
  * It's like [ByteArray], but it can be used as key in [Map], because
  * ByteWord calculates hash from content of byte array.
  */
-class ByteWord(private val inner: ByteArray = byteArrayOf()) {
+class ByteWord(
+        private val inner: ByteArray = byteArrayOf()
+) : Iterable<Byte> {
 
     operator fun plus(byte: Byte): ByteWord = ByteWord(inner + byte)
+
+    operator fun get(i: Int): Byte = inner[i]
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -42,8 +46,10 @@ class ByteWord(private val inner: ByteArray = byteArrayOf()) {
 
     override fun hashCode(): Int = inner.contentHashCode()
 
-    override fun toString(): String {
-        return "[${inner.toHexString()}]"
+    override fun toString(): String = "[${inner.toHexString()}]"
+
+    override fun iterator(): Iterator<Byte> {
+        return inner.iterator()
     }
 }
 
