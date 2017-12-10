@@ -28,7 +28,24 @@ package ru.endlesscode.lzw
 import ru.endlesscode.lzw.io.InputStream
 import ru.endlesscode.lzw.io.OutputStream
 
+/**
+ * Compressor that compresses streams
+ */
 interface Compressor {
+
+    /**
+     * Compress [input] stream to [output].
+     *
+     * @param input Source stream to read raw bytes
+     * @param output Destination stream to write compressed bytes
+     */
     fun compress(input: InputStream, output: OutputStream)
+
+    /**
+     * Decompress [input] stream to [output].
+     *
+     * @param input Source stream to read compressed bytes
+     * @param input Destination stream to write raw bytes
+     */
     fun decompress(input: InputStream, output: OutputStream)
 }

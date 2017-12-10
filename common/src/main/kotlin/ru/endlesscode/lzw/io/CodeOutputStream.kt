@@ -33,7 +33,7 @@ class CodeOutputStream(
         private val codeLength: Int
 ) {
 
-    private val mask = (1 shl codeLength) - 1
+    private val mask = Bytes.mask(codeLength)
     private val bufSize = Bytes.BITS_IN_INT
 
     private var buf = 0

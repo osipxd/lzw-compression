@@ -31,6 +31,8 @@ import ru.endlesscode.lzw.io.InputStream
 import ru.endlesscode.lzw.io.OutputStream
 import ru.endlesscode.lzw.io.readEachByte
 import ru.endlesscode.lzw.util.ByteWord
+import ru.endlesscode.lzw.util.Bytes
+import ru.endlesscode.lzw.util.unsignedToLong
 import ru.endlesscode.lzw.util.wordFromBytes
 
 /**
@@ -39,6 +41,7 @@ import ru.endlesscode.lzw.util.wordFromBytes
  * @param codeLength Code length in bits. It determines how much records can be in [codeTable].
  * Available number of records can be calculated as 2^[codeLength] - [INIT_DICT_SIZE]. With current
  * implementation of [CodeOutputStream] and [CodeInputStream] it can't be higher than 64.
+ * Changing of this parameter can increase or decrease compression rate.
  */
 class LzwCompressor(
         val codeLength: Int = DEFAULT_CODE_LENGTH
@@ -65,15 +68,23 @@ class LzwCompressor(
     private lateinit var codeTable: MutableMap<ByteWord, Int>
 
     /**
-     * List that contains bytes sequences
+     * List that contains bytes sequences.
      */
     private lateinit var decodeTable: MutableList<ByteWord>
 
+    /**
+     * Code that will be used for new entry in [codeTable]. Can't be more than [maxCode].
+     */
+    private var nextCode: Long = 0
+
+    /**
+     * Maximal possible code of entry in [codeTable]. It equals to maximal.
+     */
+    private val maxCode: Long = Bytes.powerOfTwo(codeLength).unsignedToLong()
 
     override fun compress(input: InputStream, output: OutputStream) {
         initTables()
 
-        var nextCode = INIT_DICT_SIZE
         var word = wordFromBytes(input.read().toByte())
         val codeOutput = CodeOutputStream(output, codeLength)
 
@@ -83,7 +94,7 @@ class LzwCompressor(
                 newWord
             } else {
                 codeOutput.write(codeTable[word] ?: throw Error("Word '$word' must be in table."))
-                codeTable.put(newWord, nextCode++)
+                if (nextCode <= maxCode) codeTable.put(newWord, nextCode++.toInt())
                 wordFromBytes(byte)
             }
         }
@@ -96,7 +107,11 @@ class LzwCompressor(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    /**
+     * Initialize [codeTable] and [decodeTable] before compression/decompression.
+     */
     private fun initTables() {
+        nextCode = INIT_DICT_SIZE.unsignedToLong()
         codeTable = hashMapOf()
         decodeTable = arrayListOf()
 

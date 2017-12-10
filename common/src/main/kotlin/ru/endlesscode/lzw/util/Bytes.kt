@@ -33,15 +33,19 @@ object Bytes {
 
     const val HEX_CHARS = "0123456789ABCDEF"
 
-    fun hex(vararg bytes: Byte): String = bytes.toHexString()
+    fun mask(bits: Int): Int = powerOfTwo(bits) - 1
+
+    fun powerOfTwo(power: Int): Int = 1 shl power
 }
 
-fun Byte.unsigned(): Int = this.toInt() and 0xFF
+fun Byte.unsignedToInt(): Int = this.toInt() and 0xFF
+
+fun Int.unsignedToLong(): Long = this.toLong() and 0xFFFFFFFF
 
 fun ByteArray.toHexString(): String {
     val hexChars = CharArray(size * 3)
     for (i in indices) {
-        val v = this[i].unsigned()
+        val v = this[i].unsignedToInt()
         val j = i * 3
         hexChars[j] = Bytes.HEX_CHARS[v ushr 0x04]
         hexChars[j + 1] = Bytes.HEX_CHARS[v and 0x0F]
