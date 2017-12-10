@@ -28,47 +28,43 @@ package ru.endlesscode.lzw.io
 import ru.endlesscode.lzw.util.Bytes
 
 /**
- * Stream that can write out codes that can't fit to one byte.
+ * Stream that can read/write codes that can't fit to one byte.
  *
- * @param stream Target stream
  * @param codeLength Determines code size. Can't be higher than [bufferSize]
  */
-class CodeOutputStream(
-        private val stream: OutputStream,
-        codeLength: Int
-) : BufferedCodeStream(codeLength) {
-
-    fun write(code: Int) {
-        val bufferedCode = (code and mask) shl (bufferedBits)
-        buffer = buffer or bufferedCode
-        bufferedBits += codeLength
-
-        writeBuffer()
-    }
+abstract class BufferedCodeStream(
+        protected val codeLength: Int
+) {
 
     /**
-     * Write filled bytes from [buffer] to [stream].
+     * Mask that used to fit code to given [codeLength].
      */
-    private fun writeBuffer() {
-        while (bufferedBits >= Bytes.BITS_IN_BYTE) {
-            writeNextByte()
-            buffer = buffer ushr Bytes.BITS_IN_BYTE
-            bufferedBits -= Bytes.BITS_IN_BYTE
-        }
-    }
-
-    fun flush() {
-        if (buffer != 0) {
-            writeNextByte()
-        }
-
-        stream.flush()
-    }
+    protected val mask = Bytes.mask(codeLength)
 
     /**
-     * Write next byte from [buffer] to [stream].
+     * Size of [buffer] in bits.
      */
-    private fun writeNextByte() {
-        stream.write(buffer and Bytes.BYTE_MASK)
+    protected val bufferSize = Bytes.BITS_IN_INT
+
+    /**
+     * Buffer to store part of code that can't fit in byte.
+     * Used Int. It can store maximum 64 bits.
+     * @see [bufferSize]
+     */
+    protected var buffer = 0
+
+    /**
+     * Num of used bits in [buffer].
+     */
+    protected var bufferedBits = 0
+
+
+    /**
+     * Validates input params.
+     */
+    init {
+        if (codeLength > bufferSize) {
+            throw IllegalArgumentException("Code length $codeLength is more than buffer size.")
+        }
     }
 }
