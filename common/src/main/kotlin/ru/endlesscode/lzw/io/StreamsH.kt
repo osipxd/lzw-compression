@@ -37,7 +37,7 @@ expect class OutputStream {
 
 // Extensions
 
-inline fun InputStream.readEachByte(process: (Byte) -> Unit) {
+inline fun InputStream.consumeEachByte(process: (Byte) -> Unit) {
     readEach { process(it.toByte()) }
 }
 

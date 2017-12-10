@@ -29,7 +29,7 @@ import ru.endlesscode.lzw.LzwCompressor.Companion.INIT_DICT_SIZE
 import ru.endlesscode.lzw.io.CodeOutputStream
 import ru.endlesscode.lzw.io.InputStream
 import ru.endlesscode.lzw.io.OutputStream
-import ru.endlesscode.lzw.io.readEachByte
+import ru.endlesscode.lzw.io.consumeEachByte
 import ru.endlesscode.lzw.util.ByteWord
 import ru.endlesscode.lzw.util.Bytes
 import ru.endlesscode.lzw.util.unsignedToLong
@@ -88,19 +88,39 @@ class LzwCompressor(
         var word = wordFromBytes(input.read().toByte())
         val codeOutput = CodeOutputStream(output, codeLength)
 
-        input.readEachByte { byte ->
+        input.consumeEachByte { byte ->
             val newWord = word + byte
             word = if (codeTable.contains(newWord)) {
                 newWord
             } else {
-                codeOutput.write(codeTable[word] ?: throw Error("Word '$word' must be in table."))
-                if (nextCode <= maxCode) codeTable.put(newWord, nextCode++.toInt())
+                codeOutput.write(getWordCode(word))
+                offerToCodeTable(newWord)
                 wordFromBytes(byte)
             }
         }
 
         codeTable[word]?.let(output::write)
         codeOutput.flush()
+    }
+
+    /**
+     * Returns word code that SHOULD be in [codeTable] or throws exception.
+     *
+     * @param word Word that code we need
+     */
+    private fun getWordCode(word: ByteWord): Int {
+        return codeTable[word] ?: throw Error("Word '$word' must be in table.")
+    }
+
+    /**
+     * Adds [newWord] to [codeTable] but only if there is free space.
+     *
+     * @param newWord Word that we need to add to [codeTable]
+     */
+    private fun offerToCodeTable(newWord: ByteWord) {
+        if (nextCode <= maxCode) {
+            codeTable.put(newWord, nextCode++.toInt())
+        }
     }
 
     override fun decompress(input: InputStream, output: OutputStream) {
