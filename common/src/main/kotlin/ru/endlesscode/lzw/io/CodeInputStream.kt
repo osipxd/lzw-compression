@@ -42,6 +42,9 @@ class CodeInputStream(
         internal const val EOF = -1
     }
 
+    /**
+     * Indicates that in [stream] there no more bytes.
+     */
     private var streamIsEmpty = false
 
     fun read(): Int {
@@ -51,6 +54,9 @@ class CodeInputStream(
         return getFromBuffer(codeLength, codeMask)
     }
 
+    /**
+     * Read bytes into buffer up to [codeLength].
+     */
     private fun fillBuffer() {
         while (bufferedBits < codeLength) {
             val byte = stream.read()
@@ -64,9 +70,12 @@ class CodeInputStream(
     }
 }
 
-fun CodeInputStream.consumeEach(consume: (Int) -> Unit) {
+
+// Extensions
+
+inline fun CodeInputStream.consumeEach(consume: (Int) -> Unit) {
     var value = this.read()
-    while (value != CodeInputStream.EOF) {
+    while (value != -1) {
         consume(value)
         value = this.read()
     }

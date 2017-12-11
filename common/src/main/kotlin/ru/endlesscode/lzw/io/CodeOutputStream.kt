@@ -53,7 +53,7 @@ class CodeOutputStream(
     }
 
     fun flush() {
-        if (buffer != 0) {
+        if (bufferedBits > 0) {
             writeNextByte()
         }
 

@@ -44,14 +44,14 @@ abstract class BufferedCodeStream(
     /**
      * Size of [buffer] in bits.
      */
-    protected val bufferSize = Bytes.BITS_IN_INT
+    private val bufferSize = Bytes.BITS_IN_INT
 
     /**
      * Buffer to store part of code that can't fit in byte.
      * Used Int. It can store maximum 64 bits.
      * @see [bufferSize]
      */
-    protected var buffer = 0
+    private var buffer = 0
 
     /**
      * Num of used bits in [buffer].
@@ -68,12 +68,25 @@ abstract class BufferedCodeStream(
         }
     }
 
+    /**
+     * Puts data to buffer and increases [bufferedBits] by data length.
+     *
+     * @param data Data to store in buffer
+     * @param length Length of data
+     * @param mask Mask to trim data
+     */
     protected fun putToBuffer(data: Int, length: Int, mask: Int = Bytes.mask(length)) {
         val trimmedData = data and mask
         buffer = buffer or (trimmedData shl bufferedBits)
         bufferedBits += length
     }
 
+    /**
+     * Returns and remove data from buffer. It changes [bufferedBits]
+     *
+     * @param length Length of data that we need
+     * @param mask Mask to corp data
+     */
     protected fun getFromBuffer(length: Int, mask: Int = Bytes.mask(length)): Int {
         val data = buffer and mask
         buffer = buffer ushr length
