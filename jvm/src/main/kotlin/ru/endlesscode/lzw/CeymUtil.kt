@@ -51,6 +51,11 @@ fun main(args: Array<String>) {
 )
 class CeymUtil : Callable<Unit> {
 
+    companion object {
+        private const val EXT_PACKED = ".ceym"
+        private const val EXT_UNPACKED = ".u"
+    }
+
     @CommandLine.Parameters(index = "0", description = ["The file to pack or unpack"])
     private lateinit var input: Path
 
@@ -87,7 +92,7 @@ class CeymUtil : Callable<Unit> {
 
     private fun onPackMode() {
         if (output == null) {
-            output = input.parent.resolve("${input.fileName}.ceym")
+            output = input.parent.resolve("${input.fileName}$EXT_PACKED")
         }
 
         doWork()
@@ -95,7 +100,7 @@ class CeymUtil : Callable<Unit> {
 
     private fun onUnpackMode() {
         if (output == null) {
-            output = input.parent.resolve(input.fileName.toString().replace(".ceym", ".u"))
+            output = input.parent.resolve(input.fileName.toString().replace(EXT_PACKED, EXT_UNPACKED))
         }
 
         doWork()
