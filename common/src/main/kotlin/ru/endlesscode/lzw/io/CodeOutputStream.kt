@@ -39,10 +39,7 @@ class CodeOutputStream(
 ) : BufferedCodeStream(codeLength) {
 
     fun write(code: Int) {
-        val bufferedCode = (code and mask) shl (bufferedBits)
-        buffer = buffer or bufferedCode
-        bufferedBits += codeLength
-
+        putToBuffer(code, codeLength, codeMask)
         writeBuffer()
     }
 
@@ -52,8 +49,6 @@ class CodeOutputStream(
     private fun writeBuffer() {
         while (bufferedBits >= Bytes.BITS_IN_BYTE) {
             writeNextByte()
-            buffer = buffer ushr Bytes.BITS_IN_BYTE
-            bufferedBits -= Bytes.BITS_IN_BYTE
         }
     }
 
@@ -69,6 +64,7 @@ class CodeOutputStream(
      * Write next byte from [buffer] to [stream].
      */
     private fun writeNextByte() {
-        stream.write(buffer and Bytes.BYTE_MASK)
+        val byte = getFromBuffer(Bytes.BITS_IN_BYTE, Bytes.BYTE_MASK)
+        stream.write(byte)
     }
 }

@@ -39,7 +39,7 @@ abstract class BufferedCodeStream(
     /**
      * Mask that used to fit code to given [codeLength].
      */
-    protected val mask = Bytes.mask(codeLength)
+    protected val codeMask = Bytes.mask(codeLength)
 
     /**
      * Size of [buffer] in bits.
@@ -66,5 +66,19 @@ abstract class BufferedCodeStream(
         if (codeLength > bufferSize) {
             throw IllegalArgumentException("Code length $codeLength is more than buffer size.")
         }
+    }
+
+    protected fun putToBuffer(data: Int, length: Int, mask: Int = Bytes.mask(length)) {
+        val trimmedData = data and mask
+        buffer = buffer or (trimmedData shl bufferedBits)
+        bufferedBits += length
+    }
+
+    protected fun getFromBuffer(length: Int, mask: Int = Bytes.mask(length)): Int {
+        val data = buffer and mask
+        buffer = buffer ushr length
+        bufferedBits -= length
+
+        return data
     }
 }

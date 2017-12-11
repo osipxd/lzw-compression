@@ -39,48 +39,34 @@ class CodeInputStream(
 ) : BufferedCodeStream(codeLength) {
 
     companion object {
-        private const val EOF = -1
-
+        internal const val EOF = -1
     }
 
+    private var streamIsEmpty = false
+
     fun read(): Int {
-        if (buffer == EOF) return EOF
+        if (streamIsEmpty) return EOF
 
         fillBuffer()
-        return readCodeFromBuffer()
+        return getFromBuffer(codeLength, codeMask)
     }
 
     private fun fillBuffer() {
         while (bufferedBits < codeLength) {
             val byte = stream.read()
             if (byte == EOF) {
-                bufferedBits = EOF
+                streamIsEmpty = true
                 return
             }
 
-            buffer = buffer or (byte shl bufferedBits)
-            bufferedBits += Bytes.BITS_IN_BYTE
+            putToBuffer(byte, Bytes.BITS_IN_BYTE, Bytes.BYTE_MASK)
         }
-    }
-
-    private fun readCodeFromBuffer(): Int {
-        if (bufferedBits == EOF) {
-            val lastBuffer = buffer
-            this.buffer = EOF
-            return lastBuffer
-        }
-
-        val code = buffer and mask
-        buffer = buffer ushr codeLength
-        bufferedBits -= codeLength
-
-        return code
     }
 }
 
 fun CodeInputStream.consumeEach(consume: (Int) -> Unit) {
     var value = this.read()
-    while (value != -1) {
+    while (value != CodeInputStream.EOF) {
         consume(value)
         value = this.read()
     }
