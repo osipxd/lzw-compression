@@ -26,21 +26,34 @@
 package ru.endlesscode.lzw.util
 
 object Bytes {
+    // Masks
     const val BYTE_MASK = 0xFF
+    const val INT_MASK = 0xFFFFFFFF
+
+    // Sizes
     const val BYTES_IN_INT = 4
     const val BITS_IN_BYTE = 8
     const val BITS_IN_INT = BITS_IN_BYTE * BYTES_IN_INT
 
+    // Etc
     const val HEX_CHARS = "0123456789ABCDEF"
 
+    /**
+     * Creates mask filled with '1'. Returns [Long]
+     * @see mask
+     */
     fun longMask(bits: Int): Long = mask(bits).unsignedToLong()
 
+    /**
+     * Creates mask filled with '1' for length = [bits].
+     * For example: mask(8) = 0xFF, mask(12) = 0xFFF
+     */
     fun mask(bits: Int): Int = (1 shl bits) - 1
 }
 
-fun Byte.unsignedToInt(): Int = this.toInt() and 0xFF
+fun Byte.unsignedToInt(): Int = this.toInt() and Bytes.BYTE_MASK
 
-fun Int.unsignedToLong(): Long = this.toLong() and 0xFFFFFFFF
+fun Int.unsignedToLong(): Long = this.toLong() and Bytes.INT_MASK
 
 fun ByteArray.toHexString(): String {
     val hexChars = CharArray(size * 3)
